@@ -66,6 +66,7 @@ let isPracticingMistakesMode = false;
 let spkScore = 0;
 let currentSpkItem = null;
 let activeRecognition = null;
+let triedChineseFallback = false;
 
 let activeUtterance = null;
 let cachedVoices = [];
@@ -639,6 +640,7 @@ function startSpeakingTest() {
 
 function nextSpeakingWord() {
     stopVoiceRecognition();
+    triedChineseFallback = false;
     const word = baseVocab[Math.floor(Math.random() * baseVocab.length)];
     const isChinese = Math.random() < 0.5;
 
@@ -666,30 +668,46 @@ function listenTargetWord() {
     speakWord(currentSpkItem.targetText, currentSpkItem.lang);
 }
 
-function startVoiceRecognition() {
+function startVoiceRecognition(overrideLang = null) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         document.getElementById('spk-result').innerHTML = '<span class="text-rose-500">⚠️ Use Google Chrome or Microsoft Edge for voice recognition.</span>';
         return;
     }
 
+    if (!currentSpkItem) {
+        nextSpeakingWord();
+    }
+
+    const langToUse = overrideLang || currentSpkItem.lang || 'en-US';
+    if (!overrideLang) {
+        triedChineseFallback = false;
+    }
+
     stopVoiceRecognition();
 
     const recognition = new SpeechRecognition();
     activeRecognition = recognition;
-    recognition.lang = currentSpkItem.lang;
+    recognition.lang = langToUse;
     recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    recognition.maxAlternatives = 3;
 
-    document.getElementById('spk-result').innerHTML = '<span class="text-amber-600">🎙️ Listening...</span>';
+    document.getElementById('spk-heard').innerText = '—';
+    document.getElementById('spk-result').innerHTML = `<span class="text-amber-600">🎙️ Listening (${langToUse})...</span>`;
 
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.trim();
-        document.getElementById('spk-heard').innerText = transcript;
+        const res0 = event.results && event.results[0] && event.results[0][0];
+        const transcript = (res0 && res0.transcript ? res0.transcript : '').trim();
+        document.getElementById('spk-heard').innerText = transcript || '—';
+
+        if (!transcript) {
+            document.getElementById('spk-result').innerHTML = '<span class="text-rose-500">⚠️ အသံဖမ်းမမိပါ၊ ပြန်ပြောကြည့်ပါ။</span>';
+            return;
+        }
 
         if (currentSpkItem.lang === 'zh-TW') {
-            if (!containsChinese(transcript) || containsEnglish(transcript)) {
-                document.getElementById('spk-result').innerHTML = '<span class="text-rose-500">⚠️ တရုတ်စာလုံးသံ (中文) နဲ့သာ ပြောရပါမယ်!</span>';
+            if (!containsChinese(transcript)) {
+                document.getElementById('spk-result').innerHTML = `<span class="text-rose-500">⚠️ တရုတ်စာလုံးသံ (中文) နဲ့သာ ပြောရပါမယ်! (Heard: "${escapeHtml(transcript)}")</span>`;
                 return;
             }
             const cleanHeard = transcript.replace(/[^\u4e00-\u9fff]/g, '');
@@ -700,7 +718,7 @@ function startVoiceRecognition() {
                 document.getElementById('spk-score').innerText = `Score: ${spkScore}`;
                 document.getElementById('spk-result').innerHTML = '<span class="text-emerald-500">✅ Great 中文 pronunciation! +15 XP</span>';
             } else {
-                document.getElementById('spk-result').innerHTML = `<span class="text-rose-500">❌ Try saying "${currentSpkItem.targetText}"</span>`;
+                document.getElementById('spk-result').innerHTML = `<span class="text-rose-500">❌ Try saying "${escapeHtml(currentSpkItem.targetText)}"</span>`;
             }
         } else {
             if (containsChinese(transcript) || !containsEnglish(transcript)) {
@@ -716,17 +734,41 @@ function startVoiceRecognition() {
                 document.getElementById('spk-score').innerText = `Score: ${spkScore}`;
                 document.getElementById('spk-result').innerHTML = '<span class="text-emerald-500">✅ Great English pronunciation! +15 XP</span>';
             } else {
-                document.getElementById('spk-result').innerHTML = `<span class="text-rose-500">❌ Try saying "${currentSpkItem.targetText}"</span>`;
+                document.getElementById('spk-result').innerHTML = `<span class="text-rose-500">❌ Try saying "${escapeHtml(currentSpkItem.targetText)}"</span>`;
             }
         }
     };
 
-    recognition.onerror = () => {
-        document.getElementById('spk-result').innerHTML = '<span class="text-rose-500">⚠️ Microphone permission needed or audio error.</span>';
+    recognition.onerror = (event) => {
+        const errCode = (event && event.error) ? event.error : 'unknown';
+
+        // If zh-TW fails with language-not-supported or audio error once, try zh-CN fallback
+        if (
+            currentSpkItem.lang === 'zh-TW' &&
+            langToUse === 'zh-TW' &&
+            !triedChineseFallback &&
+            (errCode === 'language-not-supported' || errCode === 'audio-capture' || errCode === 'not-allowed')
+        ) {
+            triedChineseFallback = true;
+            startVoiceRecognition('zh-CN');
+            return;
+        }
+
+        const errMessages = {
+            'no-speech': '⚠️ အသံမကြားရပါ (no-speech) — Mic နားနည်းနည်းကပ်ပြီး ပြတ်ပြတ်သားသား ပြန်ပြောကြည့်ပါ။',
+            'audio-capture': '⚠️ Microphone ဖမ်းလို့မရပါ (audio-capture) — Mic ချိတ်ထားမထား စစ်ပါ။',
+            'not-allowed': '⚠️ Microphone ခွင့်ပြုချက် လိုပါတယ် (not-allowed) — Browser address bar ဘေးက icon မှာ Allow ပေးပါ။',
+            'language-not-supported': '⚠️ Browser/System မှာ Chinese speech model မရှိပါ (language-not-supported)။',
+            'network': '⚠️ Network error ဖြစ်နေပါတယ် (network) — Internet connection စစ်ပါ။'
+        };
+        const msg = errMessages[errCode] || `⚠️ Voice error (${escapeHtml(errCode)}) — တရုတ်လို ဖမ်းမရရင် Browser/System language settings စစ်ပါ။`;
+        document.getElementById('spk-result').innerHTML = `<span class="text-rose-500">${msg}</span>`;
     };
 
     recognition.onend = () => {
-        if (activeRecognition === recognition) activeRecognition = null;
+        if (activeRecognition === recognition) {
+            activeRecognition = null;
+        }
     };
 
     try {
