@@ -66,6 +66,57 @@ let isPracticingMistakesMode = false;
 // Speaking Test State
 let spkScore = 0;
 let currentSpkItem = null;
+let activeRecognition = null;
+
+// Audio TTS State
+let activeUtterance = null;
+let cachedVoices = [];
+
+function loadVoicesList() {
+    if (!('speechSynthesis' in window)) return [];
+    const list = window.speechSynthesis.getVoices();
+    if (list && list.length > 0) {
+        cachedVoices = list;
+    }
+    return cachedVoices;
+}
+
+if ('speechSynthesis' in window) {
+    loadVoicesList();
+    window.speechSynthesis.onvoiceschanged = () => {
+        loadVoicesList();
+    };
+}
+
+function stopVoiceRecognition() {
+    if (activeRecognition) {
+        try {
+            activeRecognition.onresult = null;
+            activeRecognition.onerror = null;
+            activeRecognition.onend = null;
+            activeRecognition.abort();
+        } catch (e) {}
+        activeRecognition = null;
+    }
+}
+
+function stopAllAudioAndMic() {
+    stopVoiceRecognition();
+    try {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    } catch (e) {}
+    activeUtterance = null;
+}
+
+window.addEventListener('pagehide', stopAllAudioAndMic);
+window.addEventListener('beforeunload', stopAllAudioAndMic);
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopAllAudioAndMic();
+    }
+});
 
 window.onload = () => {
     setTheme(state.theme);
@@ -193,6 +244,7 @@ function setTheme(mode) {
 }
 
 function showSection(secName) {
+    stopAllAudioAndMic();
     ['home-section', 'levels-section', 'starred-section', 'flashcards-section', 'quiz-section', 'speaking-section', 'mistakes-section'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
     });
@@ -364,7 +416,6 @@ function loadQuizQuestion() {
             document.getElementById('typing-input').placeholder = 'Type English word ONLY (e.g. accept)';
         }
     } else if (currentMode === 'arcade') {
-        // Arcade Game: Match target word to exact Emoji + Chinese meaning (hide English answer word)
         typingDiv.classList.add('hidden');
         optionsDiv.classList.remove('hidden');
         optionsDiv.innerHTML = '';
@@ -392,7 +443,6 @@ function loadQuizQuestion() {
             optionsDiv.appendChild(btn);
         });
     } else {
-        // Speed Quiz (15s)
         typingDiv.classList.add('hidden');
         optionsDiv.classList.remove('hidden');
         optionsDiv.innerHTML = '';
@@ -549,6 +599,7 @@ function practiceRemainingMistakes() {
 
 function exitQuiz() {
     clearInterval(timerInterval);
+    stopAllAudioAndMic();
     showSection(isPracticingMistakesMode ? 'mistakes' : 'home');
 }
 
@@ -577,6 +628,7 @@ function startSpeakingTest() {
 }
 
 function nextSpeakingWord() {
+    stopVoiceRecognition();
     const word = baseVocab[Math.floor(Math.random() * baseVocab.length)];
     const isChinese = Math.random() < 0.5;
 
@@ -613,7 +665,10 @@ function startVoiceRecognition() {
         return;
     }
 
+    stopVoiceRecognition();
+
     const recognition = new SpeechRecognition();
+    activeRecognition = recognition;
     recognition.lang = currentSpkItem.lang;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
@@ -662,18 +717,78 @@ function startVoiceRecognition() {
         document.getElementById('spk-result').innerHTML = '<span class="text-rose-500">⚠️ Microphone permission needed or audio error.</span>';
     };
 
-    recognition.start();
+    recognition.onend = () => {
+        if (activeRecognition === recognition) {
+            activeRecognition = null;
+        }
+    };
+
+    try {
+        recognition.start();
+    } catch (e) {
+        activeRecognition = null;
+        document.getElementById('spk-result').innerHTML = '<span class="text-rose-500">⚠️ Could not start microphone.</span>';
+    }
 }
 
 // Audio TTS
+function pickBestVoice(lang) {
+    const voices = loadVoicesList();
+    if (!voices.length) return null;
+
+    const target = lang.toLowerCase();
+    const prefix = target.split('-')[0];
+
+    let found = voices.find(v => v.lang && v.lang.toLowerCase() === target);
+    if (found) return found;
+
+    if (prefix === 'zh') {
+        found = voices.find(v => v.lang && /^(zh|cmn)/i.test(v.lang));
+        if (found) return found;
+    }
+
+    found = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(prefix));
+    return found || null;
+}
+
 function speakWord(text, lang = 'en-US') {
+    if (!text || !('speechSynthesis' in window)) return;
+
+    try {
+        window.speechSynthesis.cancel();
+    } catch (e) {}
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    speechSynthesis.speak(utterance);
+    activeUtterance = utterance;
+
+    const chosenVoice = pickBestVoice(lang);
+    if (chosenVoice) {
+        utterance.voice = chosenVoice;
+        utterance.lang = chosenVoice.lang;
+    } else {
+        utterance.lang = lang;
+    }
+
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    utterance.onend = () => {
+        activeUtterance = null;
+    };
+    utterance.onerror = () => {
+        activeUtterance = null;
+    };
+
+    setTimeout(() => {
+        try {
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {}
+    }, 60);
 }
 
 function speakCurrent(lang) {
     const word = currentWords[currentIndex];
+    if (!word) return;
     speakWord(lang === 'zh-TW' ? word.zh : word.en, lang);
 }
 
