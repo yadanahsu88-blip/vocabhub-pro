@@ -1,4 +1,3 @@
-// Vocabulary Database with Emojis & Exact Meanings
 const baseVocab = [
     { en: "accept", zh: "接受", pinyin: "jiē shòu", zhuyin: "ㄐㄧㄝ ㄕㄡˋ", my: "လက်ခံသည်", emoji: "🤝", ex: "I accept your idea." },
     { en: "achieve", zh: "達成", pinyin: "dá chéng", zhuyin: "ㄉㄚˊ ㄔㄥˊ", my: "အောင်မြင်ရရှိသည်", emoji: "🏆", ex: "Work hard to achieve your goals." },
@@ -12,7 +11,6 @@ const baseVocab = [
     { en: "inspire", zh: "啟發", pinyin: "qǐ fā", zhuyin: "ㄑㄧˇ ㄈㄚ", my: "စိတ်ဓာတ်ခွန်အားပေးသည်", emoji: "✨", ex: "Good teachers inspire students." }
 ];
 
-// Generate 50 Levels (5 words per level)
 const levelsData = {};
 for (let lvl = 1; lvl <= 50; lvl++) {
     levelsData[lvl] = [];
@@ -39,6 +37,7 @@ let state = JSON.parse(localStorage.getItem('vocabhub_state')) || {
     remainingMistakes: [],
     practicedMistakes: [],
     theme: 'light',
+    ttsRate: 0.95,
     reviews: defaultReviews,
     userNote: ''
 };
@@ -50,6 +49,7 @@ if (!Array.isArray(state.remainingMistakes)) state.remainingMistakes = [];
 if (!Array.isArray(state.practicedMistakes)) state.practicedMistakes = [];
 if (!state.unlockedFlashcardLevel) state.unlockedFlashcardLevel = 1;
 if (!state.unlockedDrillLevel) state.unlockedDrillLevel = 1;
+if (typeof state.ttsRate !== 'number' || Number.isNaN(state.ttsRate)) state.ttsRate = 0.95;
 if (!Array.isArray(state.reviews) || state.reviews.length === 0) state.reviews = [...defaultReviews];
 
 let currentMode = 'flashcards';
@@ -63,29 +63,23 @@ let selectedStars = 5;
 let currentTypingDirection = 'en-to-zh';
 let isPracticingMistakesMode = false;
 
-// Speaking Test State
 let spkScore = 0;
 let currentSpkItem = null;
 let activeRecognition = null;
 
-// Audio TTS State
 let activeUtterance = null;
 let cachedVoices = [];
 
 function loadVoicesList() {
     if (!('speechSynthesis' in window)) return [];
     const list = window.speechSynthesis.getVoices();
-    if (list && list.length > 0) {
-        cachedVoices = list;
-    }
+    if (list && list.length > 0) cachedVoices = list;
     return cachedVoices;
 }
 
 if ('speechSynthesis' in window) {
     loadVoicesList();
-    window.speechSynthesis.onvoiceschanged = () => {
-        loadVoicesList();
-    };
+    window.speechSynthesis.onvoiceschanged = () => loadVoicesList();
 }
 
 function stopVoiceRecognition() {
@@ -103,9 +97,7 @@ function stopVoiceRecognition() {
 function stopAllAudioAndMic() {
     stopVoiceRecognition();
     try {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     } catch (e) {}
     activeUtterance = null;
 }
@@ -113,14 +105,34 @@ function stopAllAudioAndMic() {
 window.addEventListener('pagehide', stopAllAudioAndMic);
 window.addEventListener('beforeunload', stopAllAudioAndMic);
 document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        stopAllAudioAndMic();
-    }
+    if (document.hidden) stopAllAudioAndMic();
 });
+
+function setSpeechRate(rate) {
+    const num = parseFloat(rate);
+    if (Number.isNaN(num)) return;
+    state.ttsRate = Math.min(1.8, Math.max(0.5, Number(num.toFixed(2))));
+    saveState();
+    updateRateUI();
+}
+
+function updateRateUI() {
+    const label = document.getElementById('speed-rate-label');
+    if (label) label.innerText = `${state.ttsRate.toFixed(2)}x`;
+
+    document.querySelectorAll('[data-rate]').forEach(btn => {
+        const r = parseFloat(btn.getAttribute('data-rate'));
+        const isActive = Math.abs(r - state.ttsRate) < 0.03;
+        btn.classList.toggle('ring-2', isActive);
+        btn.classList.toggle('ring-pink-500', isActive);
+        btn.classList.toggle('font-extrabold', isActive);
+    });
+}
 
 window.onload = () => {
     setTheme(state.theme);
     updateUIStats();
+    updateRateUI();
     renderReviews();
     setupStarSelector();
     setupFeedbackForm();
@@ -148,7 +160,6 @@ function updateUIStats() {
     document.getElementById('prog-qz-bar').style.width = `${drPct}%`;
 }
 
-// Personal Notes
 function saveUserNote() {
     state.userNote = document.getElementById('user-note-area').value;
     saveState();
@@ -161,7 +172,6 @@ function clearUserNote() {
     saveState();
 }
 
-// 1-5 Star Selector
 function setStarValue(count) {
     selectedStars = count;
     document.getElementById('fb-rating').value = '⭐'.repeat(count);
@@ -186,7 +196,6 @@ function setupStarSelector() {
     setStarValue(5);
 }
 
-// Reviews
 function renderReviews() {
     const list = document.getElementById('reviews-list');
     if (!list) return;
@@ -235,12 +244,26 @@ function setupFeedbackForm() {
     });
 }
 
-// Theme & Navigation
 function setTheme(mode) {
     document.body.classList.remove('light-mode', 'reading-mode', 'dark-mode');
     document.body.classList.add(`${mode}-mode`);
     state.theme = mode;
     localStorage.setItem('vocabhub_state', JSON.stringify(state));
+}
+
+function getActiveSection() {
+    const sections = ['home-section', 'levels-section', 'starred-section', 'flashcards-section', 'quiz-section', 'speaking-section', 'mistakes-section'];
+    for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('hidden')) return id;
+    }
+    return 'home-section';
+}
+
+function goBackSection() {
+    const active = getActiveSection();
+    if (active === 'quiz-section') exitQuiz();
+    else if (active !== 'home-section') showSection('home');
 }
 
 function showSection(secName) {
@@ -253,7 +276,6 @@ function showSection(secName) {
     if (secName === 'mistakes') renderMistakesManager();
 }
 
-// Level Selection Grid (1 - 50)
 function openLevelSelect(mode) {
     currentMode = mode;
     const titles = {
@@ -305,7 +327,6 @@ function startLevel(lvl) {
     }
 }
 
-// FLASHCARDS
 function renderFlashcard() {
     const word = currentWords[currentIndex];
     document.getElementById('fc-emoji').innerText = word.emoji;
@@ -362,13 +383,10 @@ function renderStarred() {
     });
 }
 
-// SPEED QUIZ (15s), VOCAB ARCADE (Emoji/Meaning Game), TYPING DRILL (Strict Language)
 function loadQuizQuestion() {
     clearInterval(timerInterval);
     if (currentIndex >= currentWords.length) {
-        if (!isPracticingMistakesMode) {
-            completeDrillLevel(currentLevel, quizScore * 10);
-        }
+        if (!isPracticingMistakesMode) completeDrillLevel(currentLevel, quizScore * 10);
         alert(`🏆 Finished! Score: ${quizScore}/${currentWords.length}`);
         showSection(isPracticingMistakesMode ? 'mistakes' : 'home');
         return;
@@ -403,17 +421,19 @@ function loadQuizQuestion() {
     if (currentMode === 'typing') {
         optionsDiv.classList.add('hidden');
         typingDiv.classList.remove('hidden');
-        document.getElementById('typing-input').value = '';
+        const inputEl = document.getElementById('typing-input');
+        inputEl.value = '';
+        setTimeout(() => inputEl.focus(), 50);
 
         currentTypingDirection = (currentIndex % 2 === 0) ? 'en-to-zh' : 'zh-to-en';
         if (currentTypingDirection === 'en-to-zh') {
             document.getElementById('quiz-prompt-label').innerText = 'English given -> Type 中文 (Traditional Chinese) ONLY';
             document.getElementById('quiz-word').innerText = word.en;
-            document.getElementById('typing-input').placeholder = '中文သက်သက် ရိုက်ထည့်ပါ (ဥပမာ: 接受)';
+            inputEl.placeholder = '中文သက်သက် ရိုက်ထည့်ပါ (ဥပမာ: 接受)';
         } else {
             document.getElementById('quiz-prompt-label').innerText = '中文 given -> Type ENGLISH ONLY';
             document.getElementById('quiz-word').innerText = `${word.zh} (${word.pinyin})`;
-            document.getElementById('typing-input').placeholder = 'Type English word ONLY (e.g. accept)';
+            inputEl.placeholder = 'Type English word ONLY (e.g. accept)';
         }
     } else if (currentMode === 'arcade') {
         typingDiv.classList.add('hidden');
@@ -434,11 +454,8 @@ function loadQuizQuestion() {
             btn.className = 'p-4 rounded-2xl border-2 border-purple-200 hover:border-purple-500 font-bold text-center transition flex flex-col items-center gap-1 bg-purple-50/40';
             btn.innerHTML = `<span class="text-3xl">${choice.emoji}</span><span class="text-sm">${choice.zh}</span>`;
             btn.onclick = () => {
-                if (choice.en === word.en) {
-                    handleCorrectAnswer(word, 15);
-                } else {
-                    handleWrongAnswer(word);
-                }
+                if (choice.en === word.en) handleCorrectAnswer(word, 15);
+                else handleWrongAnswer(word);
             };
             optionsDiv.appendChild(btn);
         });
@@ -462,11 +479,8 @@ function loadQuizQuestion() {
             btn.innerHTML = `<div class="font-extrabold text-sm">${choice.zh} (${choice.pinyin})</div><div class="opacity-80 mt-0.5">${choice.my}</div>`;
             btn.onclick = () => {
                 clearInterval(timerInterval);
-                if (choice.en === word.en) {
-                    handleCorrectAnswer(word, 10);
-                } else {
-                    handleWrongAnswer(word);
-                }
+                if (choice.en === word.en) handleCorrectAnswer(word, 10);
+                else handleWrongAnswer(word);
             };
             optionsDiv.appendChild(btn);
         });
@@ -483,7 +497,15 @@ function containsEnglish(text) {
 
 function checkTypingAnswer() {
     const word = currentWords[currentIndex];
-    const raw = document.getElementById('typing-input').value.trim();
+    const inputEl = document.getElementById('typing-input');
+    const raw = inputEl.value.trim();
+
+    if (!raw && document.getElementById('quiz-feedback').innerText.trim() !== '') {
+        clearInterval(timerInterval);
+        currentIndex++;
+        loadQuizQuestion();
+        return;
+    }
     if (!raw) return;
 
     if (currentTypingDirection === 'en-to-zh') {
@@ -491,21 +513,15 @@ function checkTypingAnswer() {
             document.getElementById('quiz-feedback').innerHTML = '<span class="text-rose-500">⚠️ 中文 (တရုတ်စာ) နဲ့သာ ဖြေပါ! English နဲ့ ဖြေလို့မရပါ။</span>';
             return;
         }
-        if (raw === word.zh) {
-            handleCorrectAnswer(word, 15);
-        } else {
-            handleWrongAnswer(word);
-        }
+        if (raw === word.zh) handleCorrectAnswer(word, 15);
+        else handleWrongAnswer(word);
     } else {
         if (containsChinese(raw) || !containsEnglish(raw)) {
             document.getElementById('quiz-feedback').innerHTML = '<span class="text-rose-500">⚠️ English နဲ့သာ ဖြေပါ! 中文 နဲ့ ဖြေလို့မရပါ။</span>';
             return;
         }
-        if (raw.toLowerCase() === word.en.toLowerCase()) {
-            handleCorrectAnswer(word, 15);
-        } else {
-            handleWrongAnswer(word);
-        }
+        if (raw.toLowerCase() === word.en.toLowerCase()) handleCorrectAnswer(word, 15);
+        else handleWrongAnswer(word);
     }
 }
 
@@ -515,9 +531,7 @@ function handleCorrectAnswer(word, xpGain) {
     const remIdx = state.remainingMistakes.findIndex(m => m.en === word.en);
     if (remIdx > -1) {
         state.remainingMistakes.splice(remIdx, 1);
-        if (!state.practicedMistakes.some(m => m.en === word.en)) {
-            state.practicedMistakes.push(word);
-        }
+        if (!state.practicedMistakes.some(m => m.en === word.en)) state.practicedMistakes.push(word);
     }
     saveState();
     document.getElementById('quiz-feedback').innerHTML = `<span class="text-emerald-500">✅ Correct! +${xpGain} XP</span>`;
@@ -526,15 +540,12 @@ function handleCorrectAnswer(word, xpGain) {
 
 function handleWrongAnswer(word) {
     document.getElementById('quiz-feedback').innerHTML = `<span class="text-rose-500">❌ Answer: ${word.en} / ${word.zh} (${word.my})</span>`;
-    if (!state.remainingMistakes.some(m => m.en === word.en)) {
-        state.remainingMistakes.push(word);
-    }
+    if (!state.remainingMistakes.some(m => m.en === word.en)) state.remainingMistakes.push(word);
     state.practicedMistakes = state.practicedMistakes.filter(m => m.en !== word.en);
     saveState();
     setTimeout(() => { currentIndex++; loadQuizQuestion(); }, 1250);
 }
 
-// MISTAKES MANAGER
 function openMistakesHub() {
     renderMistakesManager();
     showSection('mistakes');
@@ -619,7 +630,6 @@ function completeDrillLevel(lvl, earnedXp) {
     saveState();
 }
 
-// SPEAKING TEST (Strict Random EN or 中文)
 function startSpeakingTest() {
     spkScore = 0;
     document.getElementById('spk-score').innerText = `Score: ${spkScore}`;
@@ -639,9 +649,7 @@ function nextSpeakingWord() {
     };
 
     document.getElementById('spk-emoji').innerText = word.emoji;
-    document.getElementById('spk-lang-badge').innerText = isChinese
-        ? '🇨🇳 中文 Only Mode'
-        : '🇺🇸 English Only Mode';
+    document.getElementById('spk-lang-badge').innerText = isChinese ? '🇨🇳 中文 Only Mode' : '🇺🇸 English Only Mode';
     document.getElementById('spk-target').innerText = currentSpkItem.targetText;
     document.getElementById('spk-rule-text').innerText = isChinese
         ? 'တရုတ်လိုသာ မှန်အောင်ပြောပါ (Chinese pronunciation only)'
@@ -718,9 +726,7 @@ function startVoiceRecognition() {
     };
 
     recognition.onend = () => {
-        if (activeRecognition === recognition) {
-            activeRecognition = null;
-        }
+        if (activeRecognition === recognition) activeRecognition = null;
     };
 
     try {
@@ -731,7 +737,6 @@ function startVoiceRecognition() {
     }
 }
 
-// Audio TTS
 function pickBestVoice(lang) {
     const voices = loadVoicesList();
     if (!voices.length) return null;
@@ -769,15 +774,11 @@ function speakWord(text, lang = 'en-US') {
         utterance.lang = lang;
     }
 
-    utterance.rate = 0.95;
+    utterance.rate = state.ttsRate || 0.95;
     utterance.pitch = 1;
 
-    utterance.onend = () => {
-        activeUtterance = null;
-    };
-    utterance.onerror = () => {
-        activeUtterance = null;
-    };
+    utterance.onend = () => { activeUtterance = null; };
+    utterance.onerror = () => { activeUtterance = null; };
 
     setTimeout(() => {
         try {
@@ -792,7 +793,81 @@ function speakCurrent(lang) {
     speakWord(lang === 'zh-TW' ? word.zh : word.en, lang);
 }
 
-// Modals
+function goNextByShortcut() {
+    const activeSec = getActiveSection();
+    if (activeSec === 'flashcards-section') {
+        nextCard();
+    } else if (activeSec === 'speaking-section') {
+        nextSpeakingWord();
+    } else if (activeSec === 'quiz-section') {
+        if (currentMode === 'typing') {
+            checkTypingAnswer();
+        } else {
+            clearInterval(timerInterval);
+            currentIndex++;
+            loadQuizQuestion();
+        }
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    const target = e.target;
+    const isTypingField = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+    );
+
+    if (e.key === 'Escape') {
+        ['note-modal', 'feedback-modal', 'shortcut-modal', 'stats-modal', 'leaderboard-modal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal && !modal.classList.contains('hidden')) closeModal(id);
+        });
+        return;
+    }
+
+    const activeSec = getActiveSection();
+
+    if (e.key === 'Enter' && activeSec === 'quiz-section' && currentMode === 'typing') {
+        if (target && target.id === 'typing-input') {
+            e.preventDefault();
+            checkTypingAnswer();
+            return;
+        }
+    }
+
+    if (isTypingField) return;
+
+    if (e.key === 'Enter') {
+        if (activeSec === 'flashcards-section' || activeSec === 'speaking-section' || activeSec === 'quiz-section') {
+            e.preventDefault();
+            goNextByShortcut();
+            return;
+        }
+    }
+
+    if (activeSec === 'flashcards-section') {
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            nextCard();
+            return;
+        }
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevCard();
+            return;
+        }
+    }
+
+    if ((e.altKey && e.key === 'ArrowLeft') || e.key === 'Backspace') {
+        if (activeSec !== 'home-section') {
+            e.preventDefault();
+            goBackSection();
+        }
+    }
+});
+
 function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
     document.getElementById(id).classList.add('flex');
