@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="application-name" content="VocabHub Pro">
+    <title>VocabHub Pro • EN • 中文 • မြန်မာ</title>
+    <!-- Custom SVG Favicon (Pastel Heart-Book + Overlapped VH) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23fbcfe8'/%3E%3Cstop offset='50%25' stop-color='%23fed7aa'/%3E%3Cstop offset='100%25' stop-color='%23ddd6fe'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23bg)'/%3E%3Cpath d='M32 52C32 52 12 39.2 12 24.5C12 18.2 17.1 13.5 23.2 13.5C27.1 13.5 30.5 15.5 32 18.6C33.5 15.5 36.9 13.5 40.8 13.5C46.9 13.5 52 18.2 52 24.5C52 39.2 32 52 32 52Z' fill='%23ffffff' fill-opacity='0.92' stroke='%23db2777' stroke-width='2'/%3E%3Cpath d='M21 24C24.5 24 28.5 25.5 32 28C35.5 25.5 39.5 24 43 24V40C39.5 40 35.5 41.5 32 44C28.5 41.5 24.5 40 21 40V24Z' fill='%23fdf2f8' stroke='%239333ea' stroke-width='1.5'/%3E%3Ctext x='32' y='36' text-anchor='middle' font-family='Arial, sans-serif' font-size='10.5' font-weight='800' fill='%23831843'%3EVH%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode transition-colors duration-300 min-h-screen flex flex-col">
+
+<!-- Brand & Cute Heart Mascot Logo (Hugging Vertical Book With Pen Clipped Vertically on Cover) -->
+            <div onclick="showSection('home')" class="flex items-center gap-3 cursor-pointer group">
+                <div class="w-16 h-16 flex items-center justify-center group-hover:scale-105 transition duration-300">
+                    <svg viewBox="0 0 84 80" class="w-16 h-16 overflow-visible" shape-rendering="geometricPrecision" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <!-- Rose-Colored Heart Mascot Body -->
+                            <linearGradient id="vertBookHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fda4af"/>
+                                <stop offset="55%" stop-color="#fb7185"/>
+                                <stop offset="100%" stop-color="#f43f5e"/>
+                            </linearGradient>
+
+                            <!-- Deeper Berry-Rose Bow Gradient (Richer Than Heart) -->
+                            <linearGradient id="vertBookBowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#e11d48"/>
+                                <stop offset="55%" stop-color="#be123c"/>
+                                <stop offset="100%" stop-color="#881337"/>
+                            </linearGradient>
+
+                            <!-- Vertical Book Cover Gradient -->
+                            <linearGradient id="vertBookCoverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fef08a"/>
+                                <stop offset="100%" stop-color="#f59e0b"/>
+                            </linearGradient>
+
+                            <!-- Pen Barrel Gradient -->
+                            <linearGradient id="penBarrelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#60a5fa"/>
+                                <stop offset="100%" stop-color="#312e81"/>
+                            </linearGradient>
+
+                            <filter id="vertBookShadow" x="-20%" y="-20%" width="145%" height="145%">
+                                <feDropShadow dx="0" dy="2.5" stdDeviation="1.8" flood-color="#4c0519" flood-opacity="0.3"/>
+                            </filter>
+                        </defs>
+
+                        <!-- Heart-Shaped Cute Mascot Body (Rose Color, No Square Box) -->
+                        <g filter="url(#vertBookShadow)">
+                            <path d="M42 66C42 66 11 47 11 27.5C11 18.8 17.8 12.5 25.8 12.5C31.5 12.5 37.5 15.6 42 20.8C46.5 15.6 52.5 12.5 58.2 12.5C66.2 12.5 73 18.8 73 27.5C73 47 42 66 42 66Z"
+                                  fill="url(#vertBookHeartGrad)"
+                                  stroke="#881337"
+                                  stroke-width="2.2"
+                                  stroke-linejoin="round"/>
+                        </g>
+
+                        <!-- Deeper Bow on Top-Right (Richer Than Rose Heart) -->
+                        <g transform="translate(54, 6)" filter="url(#vertBookShadow)">
+                            <path d="M8 7C3 2 -2 4 -1 9C0 13 5 12 9 9.5Z"
+                                  fill="url(#vertBookBowGrad)"
+                                  stroke="#4c0519"
+                                  stroke-width="1.45"
+                                  stroke-linejoin="round"/>
+                            <path d="M12 7C17 2 22 4 21 9C20 13 15 12 11 9.5Z"
+                                  fill="url(#vertBookBowGrad)"
+                                  stroke="#4c0519"
+                                  stroke-width="1.45"
+                                  stroke-linejoin="round"/>
+                            <path d="M8.5 11L6.5 16.5L9.5 15L10.5 12Z" fill="#be123c" stroke="#4c0519" stroke-width="1.15" stroke-linejoin="round"/>
+                            <path d="M11.5 11L13.5 16.5L10.5 15L9.5 12Z" fill="#881337" stroke="#4c0519" stroke-width="1.15" stroke-linejoin="round"/>
+                            <rect x="7.8" y="6.2" width="4.4" height="5.2" rx="1.6"
+                                  fill="#9f1239"
+                                  stroke="#4c0519"
+                                  stroke-width="1.35"/>
+                        </g>
+
+                        <!-- Cute Face & Glasses -->
+                        <g>
+                            <ellipse cx="27.5" cy="30" rx="3" ry="1.7" fill="#e11d48" fill-opacity="0.35"/>
+                            <ellipse cx="56.5" cy="30" rx="3" ry="1.7" fill="#e11d48" fill-opacity="0.35"/>
+
+                            <circle cx="33.5" cy="26.5" r="2" fill="#312e81"/>
+                            <circle cx="34.2" cy="25.8" r="0.65" fill="#ffffff"/>
+                            <circle cx="50.5" cy="26.5" r="2" fill="#312e81"/>
+                            <circle cx="51.2" cy="25.8" r="0.65" fill="#ffffff"/>
+
+                            <rect x="27.5" y="22.8" width="11.5" height="7.6" rx="2.4"
+                                  fill="#ffffff"
+                                  fill-opacity="0.22"
+                                  stroke="#4c1d95"
+                                  stroke-width="1.45"/>
+                            <rect x="45" y="22.8" width="11.5" height="7.6" rx="2.4"
+                                  fill="#ffffff"
+                                  fill-opacity="0.22"
+                                  stroke="#4c1d95"
+                                  stroke-width="1.45"/>
+                            <line x1="39" y1="26.4" x2="45" y2="26.4" stroke="#4c1d95" stroke-width="1.45" stroke-linecap="round"/>
+
+                            <path d="M39.3 31.5C40.5 33.1 43.5 33.1 44.7 31.5"
+                                  fill="none"
+                                  stroke="#881337"
+                                  stroke-width="1.55"
+                                  stroke-linecap="round"/>
+                        </g>
+
+                        <!-- Left Side: Hugging Vertical Book + Pen Clipped Vertically on Cover -->
+                        <g filter="url(#vertBookShadow)">
+                            <!-- Vertical Closed Book -->
+                            <g transform="translate(21.5, 32)">
+                                <rect x="0" y="0" width="14.5" height="20" rx="1.8"
+                                      fill="url(#vertBookCoverGrad)"
+                                      stroke="#78350f"
+                                      stroke-width="1.45"/>
+                                <!-- Spine Binding on Left -->
+                                <line x1="2.6" y1="0.8" x2="2.6" y2="19.2" stroke="#92400e" stroke-width="1.3"/>
+                                <!-- Page Edge Thickness on Right -->
+                                <path d="M14.5 1.4H16V18.8H14.5Z" fill="#fffbeb" stroke="#78350f" stroke-width="1.05"/>
+                                <!-- Subtle Cover Emblem -->
+                                <rect x="5.2" y="5.5" width="6.5" height="2.2" rx="0.8" fill="#fef9c3" stroke="#92400e" stroke-width="0.75"/>
+                            </g>
+
+                            <!-- Pen Clipped Vertically on Front Cover (Visible From Outside) -->
+                            <g transform="translate(31.2, 33.5)">
+                                <!-- Pen Body -->
+                                <rect x="0" y="0" width="3" height="14.5" rx="1.2"
+                                      fill="url(#penBarrelGrad)"
+                                      stroke="#1e1b4b"
+                                      stroke-width="1.05"/>
+                                <!-- Pen Clip -->
+                                <line x1="2.9" y1="2" x2="2.9" y2="8.5" stroke="#fde047" stroke-width="1.15" stroke-linecap="round"/>
+                                <!-- Pen Nib / Tip -->
+                                <polygon points="0,14.5 3,14.5 1.5,17.8"
+                                         fill="#fde68a"
+                                         stroke="#78350f"
+                                         stroke-width="0.9"
+                                         stroke-linejoin="round"/>
+                            </g>
+
+                            <!-- Left Arm Hugging Vertical Book -->
+                            <path d="M18.5 34.5C15.5 41.5 19 49.5 27.5 52"
+                                  fill="none"
+                                  stroke="#881337"
+                                  stroke-width="2.15"
+                                  stroke-linecap="round"/>
+                        </g>
+
+                        <!-- Right Arm Reaching Up to Push Up Glasses -->
+                        <g filter="url(#vertBookShadow)">
+                            <path d="M63 39C65.5 34 61.5 29.5 56.5 28.5"
+                                  fill="none"
+                                  stroke="#881337"
+                                  stroke-width="2.15"
+                                  stroke-linecap="round"/>
+                            <circle cx="56.2" cy="28.3" r="1.9"
+                                    fill="#fda4af"
+                                    stroke="#881337"
+                                    stroke-width="1.3"/>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">VocabHub Pro</h1>
+                    <p class="text-xs opacity-75 font-medium">EN • 中文 • မြန်မာ</p>
+                </div>
+            </div>
+            
+            <!-- Stats, Quick Links, Note & Theme Controls -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- XP Badge -->
+                <div class="flex items-center gap-1.5 bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+                    <span>⚡</span>
+                    <span id="xp-display">0 XP</span>
+                </div>
+
+                <!-- Unlocked Badge -->
+                <div class="flex items-center gap-1.5 bg-pink-100 text-pink-800 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+                    <span>🔥</span>
+                    <span id="unlocked-display">FC Lv.1 • Drill Lv.1</span>
+                </div>
+
+                <!-- Quick Links: Google, ChatGPT, Gemini -->
+                <div class="flex items-center gap-1.5 bg-gray-100/80 dark:bg-gray-800 px-2.5 py-1 rounded-full border border-gray-200">
+                    <a href="https://www.google.com" target="_blank" title="Open Google" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-blue-600 hover:bg-blue-50 shadow-sm transition font-bold text-xs">
+                        <i class="fab fa-google"></i>
+                    </a>
+                    <a href="https://chatgpt.com" target="_blank" title="Open ChatGPT" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-emerald-600 hover:bg-emerald-50 shadow-sm transition text-xs">
+                        <i class="fas fa-robot"></i>
+                    </a>
+                    <a href="https://gemini.google.com" target="_blank" title="Open Google Gemini" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-purple-600 hover:bg-purple-50 shadow-sm transition text-xs">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </a>
+                </div>
+
+                <!-- Personal Note Button -->
+                <button onclick="openModal('note-modal')" title="Personal Notes" class="px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 hover:bg-indigo-200 text-xs font-bold shadow-sm transition flex items-center gap-1">
+                    <span>📝</span>
+                    <span class="hidden sm:inline">Notes</span>
+                </button>
+
+                <!-- Display Mode Switcher -->
+                <div class="flex items-center gap-1 bg-pink-50 p-1 rounded-full border border-pink-200">
+                    <button onclick="setTheme('light')" title="Light Mode" class="w-7 h-7 rounded-full flex items-center justify-center text-xs hover:bg-white transition">☀️</button>
+                    <button onclick="setTheme('reading')" title="Reading Mode" class="w-7 h-7 rounded-full flex items-center justify-center text-xs hover:bg-amber-100 transition">📖</button>
+                    <button onclick="setTheme('dark')" title="Dark Mode" class="w-7 h-7 rounded-full flex items-center justify-center text-xs hover:bg-gray-800 transition">🌙</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
+
+        <!-- 1. HOME SECTION -->
+        <section id="home-section" class="space-y-8 animate-fadeIn">
+            <!-- Hero Banner -->
+            <div class="text-center max-w-2xl mx-auto space-y-3 py-4">
+                <span class="inline-block px-4 py-1 rounded-full bg-pink-100 text-pink-600 text-xs font-bold tracking-wide">✨ Gamified Trilingual Learning Hub</span>
+                <h2 class="text-3xl sm:text-5xl font-black tracking-tight">
+                    Level Up Your <span class="bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 bg-clip-text text-transparent">Vocabulary</span>.
+                </h2>
+                <p class="text-sm sm:text-base opacity-80">
+                    Master English, Traditional Chinese, and Myanmar through interactive game modes, voice checks, and smart flashcards.
+                </p>
+            </div>
+
+            <!-- Top Cards: Daily Drop & Progress Hub -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Daily Drop Card -->
+                <div class="card-box p-6 rounded-3xl border border-pink-200/60 shadow-lg relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">⚡ Daily Drop</span>
+                        <span class="text-xs font-bold text-pink-500">🔥 Streak: 1 Days</span>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between">
+                            <h3 id="daily-en" class="text-2xl font-black">accept 🤝</h3>
+                            <button onclick="speakWord('accept', 'en-US')" class="w-9 h-9 rounded-full bg-pink-100 text-pink-600 hover:bg-pink-200 flex items-center justify-center transition">🔊</button>
+                        </div>
+                        <p id="daily-zh" class="text-lg font-bold text-pink-600">接受 <span class="text-sm font-normal opacity-75">(jiē shòu)</span></p>
+                        <p id="daily-my" class="text-base font-medium opacity-90">လက်ခံသည်</p>
+                    </div>
+                    <p id="daily-ex" class="mt-4 pt-3 border-t border-pink-100 text-xs italic opacity-75">"I accept your idea."</p>
+                </div>
+
+                <!-- Progress & XP Hub -->
+                <div class="card-box p-6 rounded-3xl border border-pink-200/60 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-extrabold flex items-center gap-2">📊 Progress & XP Hub</h3>
+                        <p class="text-xs opacity-75 mt-1">Flashcards unlock next level first, then Speed Quiz / Vocab Arcade / Typing unlock!</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 my-4 text-center">
+                        <div class="p-3 rounded-2xl bg-pink-50/80 text-pink-900">
+                            <p class="text-xs opacity-75">Completed</p>
+                            <p id="stat-completed" class="text-xl font-black">0</p>
+                        </div>
+                        <div onclick="showSection('starred')" class="p-3 rounded-2xl bg-amber-50/80 text-amber-900 cursor-pointer hover:scale-105 transition">
+                            <p class="text-xs opacity-75">⭐ Starred</p>
+                            <p id="stat-starred" class="text-xl font-black">0</p>
+                        </div>
+                        <div onclick="openModal('leaderboard-modal')" class="p-3 rounded-2xl bg-purple-50/80 text-purple-900 cursor-pointer hover:scale-105 transition">
+                            <p class="text-xs opacity-75">🏆 Rank</p>
+                            <p class="text-xl font-black">#1</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openModal('stats-modal')" class="flex-1 py-2 px-3 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600 transition">📈 Performance</button>
+                        <button onclick="openModal('feedback-modal')" class="flex-1 py-2 px-3 rounded-xl border border-pink-300 text-xs font-bold hover:bg-pink-50 transition">⭐ Rate & Feedback</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 Game Modes Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div onclick="openLevelSelect('flashcards')" class="card-box p-5 rounded-3xl border border-pink-200/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-11 h-11 rounded-2xl bg-pink-100 text-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">📚</div>
+                        <h3 class="text-base font-extrabold">Flashcards</h3>
+                        <p class="text-xs opacity-75 mt-1">Study first to unlock next levels & drills.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-pink-500 group-hover:translate-x-1 transition inline-block">Start Learning ➜</span>
+                </div>
+
+                <div onclick="openLevelSelect('quiz')" class="card-box p-5 rounded-3xl border border-pink-200/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-11 h-11 rounded-2xl bg-amber-100 text-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">🧠</div>
+                        <h3 class="text-base font-extrabold">Speed Quiz</h3>
+                        <p class="text-xs opacity-75 mt-1">Fast 15s timed meaning quiz challenge.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-amber-600 group-hover:translate-x-1 transition inline-block">15s Challenge ➜</span>
+                </div>
+
+                <div onclick="openLevelSelect('arcade')" class="card-box p-5 rounded-3xl border border-pink-200/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-11 h-11 rounded-2xl bg-purple-100 text-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">🎮</div>
+                        <h3 class="text-base font-extrabold">Vocab Arcade</h3>
+                        <p class="text-xs opacity-75 mt-1">Match words with exact emoji icons & meanings!</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-purple-600 group-hover:translate-x-1 transition inline-block">Play Arcade ➜</span>
+                </div>
+
+                <div onclick="openLevelSelect('typing')" class="card-box p-5 rounded-3xl border border-pink-200/60 shadow-md hover:shadow-xl hover:-translate-y-1 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">⌨️</div>
+                        <h3 class="text-base font-extrabold">Typing Drill</h3>
+                        <p class="text-xs opacity-75 mt-1">Strict language mode: 中文 for 中文, EN for EN.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition inline-block">Start Practice ➜</span>
+                </div>
+
+                <div onclick="startSpeakingTest()" class="card-box p-5 rounded-3xl border-2 border-rose-300 shadow-md hover:shadow-xl hover:-translate-y-1 transition cursor-pointer flex flex-col justify-between group">
+                    <div>
+                        <div class="w-11 h-11 rounded-2xl bg-rose-100 text-xl flex items-center justify-center mb-3 group-hover:scale-110 transition">🎤</div>
+                        <h3 class="text-base font-extrabold text-rose-600">Speaking Test</h3>
+                        <p class="text-xs opacity-75 mt-1">Strict random EN or 中文 pronunciation check.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-rose-500 group-hover:translate-x-1 transition inline-block">Speak Now ➜</span>
+                </div>
+            </div>
+
+            <!-- Mistakes Practice & Reviews -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div onclick="openMistakesHub()" class="card-box p-5 rounded-3xl border border-rose-200/70 flex items-center justify-between cursor-pointer hover:shadow-md transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-rose-100 text-xl flex items-center justify-center">⚠️</div>
+                        <div>
+                            <h3 class="font-bold text-base">Practice Mistakes</h3>
+                            <p class="text-xs opacity-75">Separate practiced & unpracticed missed words.</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span id="mistakes-count" class="block text-xs font-bold text-rose-500 mb-1">0 remaining</span>
+                        <button type="button" class="px-4 py-1.5 rounded-full bg-rose-500 text-white text-xs font-bold hover:bg-rose-600 transition">Open</button>
+                    </div>
+                </div>
+
+                <div class="card-box p-5 rounded-3xl border border-pink-200/70">
+                    <h3 class="font-bold text-base mb-2">💬 Learner Reviews</h3>
+                    <div id="reviews-list" class="text-xs space-y-2 opacity-85">
+                        <p class="p-2 rounded-xl bg-pink-50/60">⭐⭐⭐⭐⭐ "Super helpful for learning Chinese & Burmese together! 🎀" - <b>Student</b></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. LEVEL SELECT SECTION (1 - 50) -->
+        <section id="levels-section" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="showSection('home')" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition">⬅ Back to Home</button>
+                <h3 id="level-mode-title" class="text-xl font-black">Choose a Level (1 - 50)</h3>
+                <div class="w-20"></div>
+            </div>
+            <p id="level-rule-hint" class="text-center text-xs font-semibold opacity-75"></p>
+            <div id="levels-grid" class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-3"></div>
+        </section>
+
+        <!-- 3. STARRED VOCABULARY SECTION -->
+        <section id="starred-section" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="showSection('home')" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold">⬅ Back</button>
+                <h3 class="text-xl font-black">⭐ Starred Vocabulary</h3>
+                <div class="w-16"></div>
+            </div>
+            <div id="starred-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- 4. FLASHCARDS SECTION -->
+        <section id="flashcards-section" class="hidden max-w-xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="openLevelSelect('flashcards')" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold">⬅ Levels</button>
+                <h3 id="fc-level-title" class="text-lg font-black">Level 1</h3>
+                <button id="fc-star-btn" onclick="toggleStarCurrent()" class="text-2xl hover:scale-110 transition">☆</button>
+            </div>
+
+            <div class="card-box p-8 rounded-3xl border-2 border-pink-300 shadow-xl text-center space-y-4">
+                <div class="text-5xl" id="fc-emoji">🤝</div>
+                <h2 id="fc-en" class="text-4xl font-black text-pink-600">accept</h2>
+                <p id="fc-zh" class="text-3xl font-bold">接受</p>
+                <p id="fc-pinyin" class="text-sm font-medium opacity-75">jiē shòu | ㄐㄧㄝ ㄕㄡˋ</p>
+                <p id="fc-my" class="text-2xl font-bold text-purple-600">လက်ခံသည်</p>
+
+                <div class="p-4 rounded-2xl bg-pink-50/70 text-sm">
+                    <span class="text-xs font-bold uppercase tracking-wider text-pink-500 block mb-1">Example</span>
+                    <p id="fc-ex" class="italic">"I accept your idea."</p>
+                </div>
+
+                <div class="flex justify-center gap-3 pt-2">
+                    <button onclick="speakCurrent('en-US')" class="px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-xs font-bold hover:bg-blue-200">🔊 English</button>
+                    <button onclick="speakCurrent('zh-TW')" class="px-4 py-2 rounded-full bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200">🔊 中文</button>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-pink-100">
+                    <button onclick="prevCard()" class="px-5 py-2 rounded-xl bg-gray-200 text-gray-800 text-xs font-bold hover:bg-gray-300">⬅ Prev</button>
+                    <span id="fc-counter" class="text-xs font-bold">1 / 5</span>
+                    <button onclick="nextCard()" class="px-5 py-2 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Next ➜</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SPEED QUIZ / VOCAB ARCADE / TYPING SECTION -->
+        <section id="quiz-section" class="hidden max-w-xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="exitQuiz()" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold">✖ Exit</button>
+                <h3 id="quiz-title" class="text-lg font-black">Speed Quiz • Level 1</h3>
+                <span id="quiz-timer" class="px-3 py-1 rounded-full bg-rose-100 text-rose-600 text-xs font-black">⏱️ 15s</span>
+            </div>
+
+            <div class="card-box p-6 sm:p-8 rounded-3xl border-2 border-pink-300 shadow-xl space-y-5">
+                <div class="flex justify-between text-xs font-bold opacity-70">
+                    <span id="quiz-q-num">QUESTION 1 / 5</span>
+                    <span id="quiz-score">Score: 0</span>
+                </div>
+
+                <div class="text-center space-y-2 py-2">
+                    <p id="quiz-prompt-label" class="text-xs font-bold text-pink-500">Select the right meaning fast!</p>
+                    <h2 id="quiz-word" class="text-3xl font-black">accept</h2>
+                    <p id="quiz-subprompt" class="text-sm font-bold text-purple-600 hidden"></p>
+                </div>
+
+                <!-- Multiple Choice Options (Speed Quiz & Vocab Arcade) -->
+                <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+                <!-- Typing Input Area (Strict Language Rule) -->
+                <div id="typing-area" class="hidden space-y-3">
+                    <input type="text" id="typing-input" placeholder="Type answer in required language..." class="w-full p-3.5 rounded-2xl border-2 border-pink-300 focus:outline-none focus:border-pink-500 text-center font-bold">
+                    <button onclick="checkTypingAnswer()" class="w-full py-3 rounded-2xl bg-pink-500 text-white font-bold hover:bg-pink-600 transition">Submit Answer</button>
+                </div>
+
+                <p id="quiz-feedback" class="text-center text-sm font-bold min-h-[24px]"></p>
+            </div>
+        </section>
+
+        <!-- 6. SPEAKING TEST SECTION (Strict Random EN or 中文) -->
+        <section id="speaking-section" class="hidden max-w-xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="showSection('home')" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold">⬅ Back</button>
+                <h3 class="text-lg font-black">🎤 Speaking Test (Random EN / 中文)</h3>
+                <span id="spk-score" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">Score: 0</span>
+            </div>
+
+            <div class="card-box p-8 rounded-3xl border-2 border-rose-300 shadow-xl text-center space-y-5">
+                <span id="spk-lang-badge" class="inline-block px-4 py-1 rounded-full bg-rose-100 text-rose-600 text-xs font-bold">English Only</span>
+
+                <div class="space-y-1">
+                    <div id="spk-emoji" class="text-4xl">🤝</div>
+                    <h2 id="spk-target" class="text-4xl font-black text-rose-600">accept</h2>
+                    <p id="spk-rule-text" class="text-xs font-bold text-purple-600">Say ONLY in English</p>
+                    <p id="spk-sub" class="text-xs opacity-75">လက်ခံသည်</p>
+                </div>
+
+                <div class="flex justify-center gap-3">
+                    <button onclick="listenTargetWord()" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200">🔊 Listen Sample</button>
+                    <button onclick="startVoiceRecognition()" class="px-6 py-2.5 rounded-full bg-rose-500 text-white text-xs font-extrabold hover:bg-rose-600 shadow-md transition">🎙️ Tap to Speak</button>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-pink-50/70 text-xs space-y-1">
+                    <p class="opacity-70">Heard Speech:</p>
+                    <p id="spk-heard" class="font-bold text-sm text-purple-700">—</p>
+                </div>
+
+                <p id="spk-result" class="text-sm font-bold min-h-[24px]"></p>
+
+                <button onclick="nextSpeakingWord()" class="w-full py-2.5 rounded-xl bg-gray-800 text-white text-xs font-bold hover:bg-gray-900 transition">🎲 Next Random Word ➜</button>
+            </div>
+        </section>
+
+        <!-- 7. PRACTICE MISTAKES SECTION (Practiced vs. Unpracticed) -->
+        <section id="mistakes-section" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="showSection('home')" class="px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-xs font-bold">⬅ Back</button>
+                <h3 class="text-xl font-black">⚠️ Practice Mistakes Manager</h3>
+                <button onclick="practiceRemainingMistakes()" class="px-4 py-2 rounded-full bg-rose-500 text-white text-xs font-bold hover:bg-rose-600 transition">▶ Practice Unpracticed Only</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Unpracticed / Remaining -->
+                <div class="card-box p-5 rounded-3xl border-2 border-rose-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-black text-base text-rose-600">🔴 Unpracticed / Remaining</h4>
+                        <span id="remaining-badge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">0</span>
+                    </div>
+                    <div id="remaining-mistakes-list" class="space-y-2 text-xs"></div>
+                </div>
+
+                <!-- Practiced / Mastered -->
+                <div class="card-box p-5 rounded-3xl border-2 border-emerald-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-black text-base text-emerald-600">🟢 Practiced / Mastered</h4>
+                        <span id="practiced-badge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">0</span>
+                    </div>
+                    <div id="practiced-mistakes-list" class="space-y-2 text-xs"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALS -->
+    <!-- Personal Note Modal -->
+    <div id="note-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="card-box max-w-md w-full p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-black">📝 Quick Study Note</h3>
+                <button onclick="closeModal('note-modal')" class="text-gray-400 hover:text-gray-600 font-bold">✖</button>
+            </div>
+            <p class="text-xs opacity-75">Jot down vocabulary reminders, tones, or study notes here.</p>
+            <textarea id="user-note-area" rows="6" placeholder="Write your study notes here..." class="w-full p-3 rounded-2xl border-2 border-indigo-200 focus:outline-none focus:border-indigo-400 text-sm text-gray-800"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="clearUserNote()" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 text-xs font-bold hover:bg-gray-300">Clear</button>
+                <button onclick="saveUserNote()" class="px-5 py-2 rounded-xl bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600">Save Note 💾</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="card-box max-w-md w-full p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-black">🏆 XP Leaderboard</h3>
+                <button onclick="closeModal('leaderboard-modal')" class="text-gray-400 hover:text-gray-600 font-bold">✖</button>
+            </div>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between p-3 rounded-xl bg-amber-100 text-amber-900 font-bold">
+                    <span>🥇 1. ELENORA (You)</span>
+                    <span id="lb-user-xp">0 XP</span>
+                </div>
+                <div class="flex justify-between p-3 rounded-xl bg-gray-100 text-gray-700">
+                    <span>🥈 2. LingLing_TW</span>
+                    <span>1,450 XP</span>
+                </div>
+                <div class="flex justify-between p-3 rounded-xl bg-gray-100 text-gray-700">
+                    <span>🥉 3. Aung_Myanmar</span>
+                    <span>1,120 XP</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rate & Feedback Modal -->
+    <div id="feedback-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="card-box max-w-md w-full p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-black">⭐ Rate & Feedback</h3>
+                <button onclick="closeModal('feedback-modal')" class="text-gray-400 hover:text-gray-600 font-bold">✖</button>
+            </div>
+            <p class="text-xs opacity-75">Tap any star (1-5) and post your review 🎀</p>
+            <form id="feedback-form" action="https://formsubmit.co/vocablearning2620@gmail.com" method="POST" class="space-y-3">
+                <input type="hidden" name="_subject" value="VocabHub Pro User Feedback!">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" id="fb-rating" name="Rating" value="⭐⭐⭐⭐⭐">
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">Rating (Tap Stars)</label>
+                    <div id="star-selector" class="flex items-center gap-2 py-1 text-2xl select-none">
+                        <button type="button" data-star="1" class="star-btn text-amber-400 hover:scale-110 transition">★</button>
+                        <button type="button" data-star="2" class="star-btn text-amber-400 hover:scale-110 transition">★</button>
+                        <button type="button" data-star="3" class="star-btn text-amber-400 hover:scale-110 transition">★</button>
+                        <button type="button" data-star="4" class="star-btn text-amber-400 hover:scale-110 transition">★</button>
+                        <button type="button" data-star="5" class="star-btn text-amber-400 hover:scale-110 transition">★</button>
+                        <span id="star-count-label" class="text-xs font-bold ml-2 opacity-80">5 / 5 Stars</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold block mb-1">Your Name</label>
+                    <input type="text" id="fb-name" name="Name" required placeholder="Enter your name" class="w-full p-2.5 rounded-xl border border-pink-200 text-sm text-gray-800">
+                </div>
+                <div>
+                    <label class="text-xs font-bold block mb-1">Message</label>
+                    <textarea id="fb-message" name="Message" rows="3" required placeholder="Write your feedback here..." class="w-full p-2.5 rounded-xl border border-pink-200 text-sm text-gray-800"></textarea>
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-pink-500 text-white font-bold text-sm hover:bg-pink-600 transition">Send Feedback ✉️</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Accuracy & Performance Modal -->
+    <div id="stats-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="card-box max-w-md w-full p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-black">📈 Accuracy & Performance</h3>
+                <button onclick="closeModal('stats-modal')" class="text-gray-400 hover:text-gray-600 font-bold">✖</button>
+            </div>
+            <div class="space-y-3 text-xs font-bold">
+                <div>
+                    <div class="flex justify-between mb-1"><span>Flashcards Unlocked</span><span id="prog-fc-txt">1/50</span></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5"><div id="prog-fc-bar" class="bg-pink-500 h-2.5 rounded-full" style="width: 2%"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1"><span>Drills Unlocked</span><span id="prog-qz-txt">1/50</span></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5"><div id="prog-qz-bar" class="bg-amber-500 h-2.5 rounded-full" style="width: 2%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-5 text-xs opacity-75 border-t border-pink-200/40 mt-10">
+        VocabHub Pro • English • 繁體中文 • မြန်မာဘာသာ • Created by ELENORA(HS,LSH) 🎀
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
